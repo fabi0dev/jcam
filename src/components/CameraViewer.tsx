@@ -5,6 +5,8 @@ import { useHlsStream, type StreamStatus } from "@/hooks/useHlsStream";
 import { usePictureInPicture } from "@/hooks/usePictureInPicture";
 import { useCameraAudio } from "@/hooks/useCameraAudio";
 import PTZControls from "@/components/PTZControls";
+import MotionSensorControl from "@/components/MotionSensorControl";
+import { useMotionSensor } from "@/hooks/useMotionSensor";
 
 interface CameraViewerProps {
   name: string;
@@ -72,6 +74,8 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
 
   useCameraAudio({ videoRef, isPip, isMuted });
 
+  const motion = useMotionSensor(videoRef, status === "online");
+
   const toggleMute = useCallback(() => {
     setIsMuted((current) => !current);
   }, []);
@@ -110,6 +114,19 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
             void videoRef.current?.play().catch(() => undefined);
           }}
         />
+
+        {/* Alerta de movimento (sobre o vídeo) */}
+        {motion.alerting && (
+          <div className="pointer-events-none absolute inset-0 z-20">
+            <div className="absolute inset-0 rounded-3xl border-2 border-red-500 animate-pulse" />
+            <div className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-2 rounded-full bg-red-600/90 px-4 py-1.5 text-sm font-medium text-white shadow-lg backdrop-blur-md sm:top-4">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+              </svg>
+              Movimento detectado
+            </div>
+          </div>
+        )}
 
         {status === "connecting" && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-950">
@@ -224,6 +241,8 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
           <PTZControls apiUrl={ptzApiUrl} />
         </div>
       </div>
+
+      <MotionSensorControl sensor={motion} />
     </section>
   );
 }
