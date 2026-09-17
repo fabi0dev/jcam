@@ -10,9 +10,15 @@ interface StoredConfig {
   enabled: boolean;
   sensitivity: number;
   sound: boolean;
+  notify: boolean;
 }
 
-const DEFAULTS: StoredConfig = { enabled: false, sensitivity: 50, sound: true };
+const DEFAULTS: StoredConfig = {
+  enabled: false,
+  sensitivity: 50,
+  sound: true,
+  notify: false,
+};
 
 function loadConfig(): StoredConfig {
   try {
@@ -28,24 +34,35 @@ export interface MotionSensor {
   enabled: boolean;
   sensitivity: number;
   sound: boolean;
+  notify: boolean;
+  notificationsBlocked: boolean;
+  notificationsUnsupported: boolean;
   alerting: boolean;
   toggleEnabled: () => void;
   setSensitivity: (value: number) => void;
   toggleSound: () => void;
+  toggleNotify: () => void;
   triggerAlert: () => void;
 }
 
 export function useMotionSensor(
   videoRef: RefObject<HTMLVideoElement | null>,
-  active: boolean
+  active: boolean,
+  cameraName: string
 ): MotionSensor {
   const [enabled, setEnabled] = useState(DEFAULTS.enabled);
   const [sensitivity, setSensitivity] = useState(DEFAULTS.sensitivity);
   const [sound, setSound] = useState(DEFAULTS.sound);
+  const [notify, setNotify] = useState(DEFAULTS.notify);
+  const [notifPermission, setNotifPermission] = useState<
+    NotificationPermission | "unsupported"
+  >("default");
   const [alerting, setAlerting] = useState(false);
 
   const [hydrated, setHydrated] = useState(false);
   const soundRef = useRef(sound);
+  const notifyRef = useRef(notify);
+  const cameraNameRef = useRef(cameraName);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const alertTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -53,12 +70,29 @@ export function useMotionSensor(
     soundRef.current = sound;
   }, [sound]);
 
+  useEffect(() => {
+    notifyRef.current = notify;
+  }, [notify]);
+
+  useEffect(() => {
+    cameraNameRef.current = cameraName;
+  }, [cameraName]);
+
+  useEffect(() => {
+    if (typeof Notification === "undefined") {
+      setNotifPermission("unsupported");
+      return;
+    }
+    setNotifPermission(Notification.permission);
+  }, []);
+
   // Carrega preferências (client-side, evita mismatch de hidratação).
   useEffect(() => {
     const cfg = loadConfig();
     setEnabled(cfg.enabled);
     setSensitivity(cfg.sensitivity);
     setSound(cfg.sound);
+    setNotify(cfg.notify);
     setHydrated(true);
   }, []);
 
@@ -66,11 +100,14 @@ export function useMotionSensor(
   useEffect(() => {
     if (!hydrated) return;
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ enabled, sensitivity, sound }));
+      localStorage.setItem(
+        STORE_KEY,
+        JSON.stringify({ enabled, sensitivity, sound, notify })
+      );
     } catch {
       // ignore
     }
-  }, [hydrated, enabled, sensitivity, sound]);
+  }, [hydrated, enabled, sensitivity, sound, notify]);
 
   const ensureAudio = useCallback(() => {
     if (audioCtxRef.current) {
@@ -106,12 +143,33 @@ export function useMotionSensor(
     });
   }, []);
 
+  const notifyBrowser = useCallback(() => {
+    if (!notifyRef.current) return;
+    if (typeof Notification === "undefined" || Notification.permission !== "granted") {
+      return;
+    }
+    try {
+      const notification = new Notification("JCam — Movimento detectado", {
+        body: `Mudança brusca na imagem de ${cameraNameRef.current}`,
+        icon: "/favicon.ico",
+        tag: "jcam-motion",
+      });
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const triggerAlert = useCallback(() => {
     setAlerting(true);
     if (soundRef.current) beep();
+    notifyBrowser();
     if (alertTimer.current) clearTimeout(alertTimer.current);
     alertTimer.current = setTimeout(() => setAlerting(false), ALERT_DURATION_MS);
-  }, [beep]);
+  }, [beep, notifyBrowser]);
 
   useEffect(() => {
     return () => {
@@ -133,6 +191,20 @@ export function useMotionSensor(
     setSound((current) => !current);
   }, [ensureAudio]);
 
+  const toggleNotify = useCallback(() => {
+    setNotify((current) => {
+      const next = !current;
+      if (
+        next &&
+        typeof Notification !== "undefined" &&
+        Notification.permission === "default"
+      ) {
+        void Notification.requestPermission().then(setNotifPermission);
+      }
+      return next;
+    });
+  }, []);
+
   useMotionDetection({
     videoRef,
     enabled: enabled && active,
@@ -144,10 +216,14 @@ export function useMotionSensor(
     enabled,
     sensitivity,
     sound,
+    notify,
+    notificationsBlocked: notifPermission === "denied",
+    notificationsUnsupported: notifPermission === "unsupported",
     alerting,
     toggleEnabled,
     setSensitivity,
     toggleSound,
+    toggleNotify,
     triggerAlert,
   };
 }

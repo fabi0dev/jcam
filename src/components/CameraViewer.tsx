@@ -74,7 +74,7 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
 
   useCameraAudio({ videoRef, isPip, isMuted });
 
-  const motion = useMotionSensor(videoRef, status === "online");
+  const motion = useMotionSensor(videoRef, status === "online", name);
 
   const toggleMute = useCallback(() => {
     setIsMuted((current) => !current);

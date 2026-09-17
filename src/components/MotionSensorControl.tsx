@@ -116,6 +116,24 @@ export default function MotionSensorControl({ sensor }: { sensor: MotionSensor }
             <Toggle checked={sensor.sound} onChange={sensor.toggleSound} label="Alerta sonoro" />
           </div>
 
+          {!sensor.notificationsUnsupported && (
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-zinc-300">Notificação do navegador</span>
+                <Toggle
+                  checked={sensor.notify}
+                  onChange={sensor.toggleNotify}
+                  label="Notificação do navegador"
+                />
+              </div>
+              {sensor.notify && sensor.notificationsBlocked && (
+                <p className="mt-1 text-[11px] text-amber-400">
+                  Permissão bloqueada — habilite as notificações deste site no navegador.
+                </p>
+              )}
+            </div>
+          )}
+
           <button
             type="button"
             onClick={sensor.triggerAlert}
