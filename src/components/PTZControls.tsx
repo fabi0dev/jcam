@@ -29,7 +29,7 @@ function PtzButton({ label, onPointerDown, onPointerUp, onClick, children }: Ptz
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
       onLostPointerCapture={onPointerUp}
-      className="flex h-9 w-9 items-center justify-center rounded-xl text-white transition-colors hover:bg-white/15 active:bg-white/25"
+      className="flex h-9 w-9 items-center justify-center rounded-xl text-white transition-colors hover:bg-zinc-700 active:bg-zinc-600"
     >
       {children}
     </button>
@@ -96,7 +96,7 @@ export default function PTZControls({ apiUrl }: PTZControlsProps) {
 
   return (
     <div className="pointer-events-auto select-none" aria-label="Controle PTZ">
-      <div className="grid grid-cols-3 gap-0.5 rounded-2xl bg-black/40 p-1 ring-1 ring-white/10 backdrop-blur-md">
+      <div className="grid grid-cols-3 gap-0.5 rounded-2xl bg-zinc-900/70 p-1 backdrop-blur-md">
         <span />
         <PtzButton label="Cima" onPointerDown={() => startMove(0, 0.5)} onPointerUp={stop}>
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

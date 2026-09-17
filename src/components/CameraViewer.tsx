@@ -52,8 +52,8 @@ function ViewerButton({ label, active = false, disabled = false, onClick, childr
       onClick={onClick}
       className={`inline-flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-30 ${
         active
-          ? "bg-sky-500 text-white shadow-lg shadow-sky-500/30"
-          : "text-zinc-100 hover:bg-white/15 active:bg-white/25"
+          ? "bg-sky-500 text-white"
+          : "text-zinc-100 hover:bg-zinc-700 active:bg-zinc-600"
       }`}
     >
       {children}
@@ -98,7 +98,7 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
     <section className="w-full">
       <div
         ref={frameRef}
-        className="group relative aspect-video w-full overflow-hidden rounded-3xl border border-zinc-800/80 bg-black shadow-2xl shadow-black/50 ring-1 ring-white/5"
+        className="group relative aspect-video w-full overflow-hidden rounded-3xl border border-zinc-800 bg-black shadow-2xl shadow-black/50"
       >
         <video
           ref={videoRef}
@@ -112,18 +112,18 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
         />
 
         {status === "connecting" && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-950">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-9 w-9 animate-spin rounded-full border-2 border-zinc-600 border-t-white" />
+              <div className="h-9 w-9 animate-spin rounded-full border-2 border-zinc-700 border-t-white" />
               <span className="text-sm font-medium text-zinc-300">Conectando…</span>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/85 backdrop-blur-sm">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-950">
             <div className="flex max-w-xs flex-col items-center gap-4 px-6 text-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/15 text-red-400">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-red-950 text-red-400">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
                 </svg>
@@ -132,7 +132,7 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
               <button
                 type="button"
                 onClick={connect}
-                className="rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+                className="rounded-full bg-zinc-800 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
               >
                 Tentar novamente
               </button>
@@ -141,8 +141,8 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
         )}
 
         {isPip && !error && (
-          <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
+          <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-zinc-950">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-white">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-11z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M13 13h5v4h-5v-4z" />
@@ -153,8 +153,8 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
         )}
 
         {/* Top bar — status */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 bg-gradient-to-b from-black/70 via-black/20 to-transparent p-3 sm:p-4">
-          <div className="pointer-events-auto flex items-center gap-2.5 rounded-full bg-black/40 px-3 py-1.5 ring-1 ring-white/10 backdrop-blur-md">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 p-3 sm:p-4">
+          <div className="pointer-events-auto flex items-center gap-2.5 rounded-full bg-zinc-900/70 px-3 py-1.5 backdrop-blur-md">
             <span className={`h-2.5 w-2.5 rounded-full ${statusMeta.dot}`} />
             <span className="text-sm font-medium text-white">{name}</span>
             <span className="text-white/20">·</span>
@@ -164,9 +164,9 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
           </div>
         </div>
 
-        {/* Bottom bar — controls + PTZ */}
-        <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-3 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-3 sm:p-4">
-          <div className="flex items-center gap-1 rounded-full bg-black/40 p-1 ring-1 ring-white/10 backdrop-blur-md">
+        {/* Bottom bar — controls + PTZ (aparece ao passar o mouse no vídeo) */}
+        <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-3 p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 sm:p-4">
+          <div className="flex items-center gap-1 rounded-full bg-zinc-900/70 p-1 backdrop-blur-md">
             <ViewerButton
               label={isMuted ? "Ativar som" : "Silenciar"}
               active={!isMuted}
