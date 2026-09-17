@@ -178,7 +178,14 @@ export function startFFmpeg(): void {
         "tcp",
         "-i",
         rtspUrl,
-        "-an",
+        // Áudio real da câmera (pcm_alaw) transcodificado para AAC. Além de
+        // permitir ouvir o ambiente, é essencial para o Picture-in-Picture: o
+        // Chrome suspende mídia "sem som" na aba oculta e fecha o PiP — uma
+        // faixa silenciosa não basta, precisa ser áudio audível de verdade.
+        "-map",
+        "0:v:0",
+        "-map",
+        "0:a:0",
         "-c:v",
         "libx264",
         "-preset",
@@ -189,6 +196,12 @@ export function startFFmpeg(): void {
         "30",
         "-sc_threshold",
         "0",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "64k",
+        "-ar",
+        "44100",
         "-f",
         "hls",
         "-hls_time",

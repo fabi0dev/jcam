@@ -114,6 +114,14 @@ export function useHlsStream(
         hls.on(Hls.Events.ERROR, (_event, data) => {
           if (controller.signal.aborted || !data.fatal) return;
 
+          // Em PiP (tipicamente com a aba em segundo plano) nunca desanexar a
+          // mídia: recoverMediaError()/reconexão chamam detachMedia() e isso
+          // fecha a janela de Picture-in-Picture. Recupera sem destruir a mídia.
+          if (document.pictureInPictureElement) {
+            hls.startLoad();
+            return;
+          }
+
           if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
             hls.startLoad();
             return;
@@ -121,11 +129,6 @@ export function useHlsStream(
 
           if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
             hls.recoverMediaError();
-            return;
-          }
-
-          if (document.pictureInPictureElement) {
-            hls.startLoad();
             return;
           }
 

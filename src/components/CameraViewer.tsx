@@ -50,7 +50,7 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
   const [isMuted, setIsMuted] = useState(true);
   const { status, error, connect } = useHlsStream(streamUrl, videoRef);
   const { isSupported: pipSupported, isActive: isPip, toggle: togglePip } =
-    usePictureInPicture(videoRef, name, isMuted);
+    usePictureInPicture(videoRef);
 
   useCameraAudio({ videoRef, isPip, isMuted });
 
