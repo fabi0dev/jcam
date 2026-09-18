@@ -63,7 +63,7 @@ async function clearHlsFiles(): Promise<void> {
 
   await writeFile(
     join(HLS_DIR, "stream.m3u8"),
-    "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:2\n#EXT-X-MEDIA-SEQUENCE:0\n"
+    "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:1\n#EXT-X-MEDIA-SEQUENCE:0\n"
   );
 }
 
@@ -197,10 +197,11 @@ export function startFFmpeg(): void {
         "ultrafast",
         "-tune",
         "zerolatency",
-        // Keyframe a cada 0,5s (independente do fps da câmera). Sem isto o GOP
-        // longo obriga segmentos HLS de vários segundos e a latência dispara.
+        // Keyframe a cada 0,25s (independente do fps da câmera). Segmentos
+        // curtos derrubam o piso de latência do HLS. Sem isto o GOP longo
+        // obriga segmentos de vários segundos e a latência dispara.
         "-force_key_frames",
-        "expr:gte(t,n_forced*0.5)",
+        "expr:gte(t,n_forced*0.25)",
         "-sc_threshold",
         "0",
         "-c:a",
@@ -216,9 +217,9 @@ export function startFFmpeg(): void {
         "-f",
         "hls",
         "-hls_time",
-        "0.5",
+        "0.25",
         "-hls_list_size",
-        "6",
+        "8",
         "-hls_flags",
         "delete_segments+append_list+omit_endlist+independent_segments",
         "-hls_segment_filename",

@@ -14,10 +14,17 @@ interface UseHlsStreamResult {
 const HLS_CONFIG: Partial<Hls["config"]> = {
   enableWorker: true,
   lowLatencyMode: true,
-  liveSyncDurationCount: 3,
-  liveMaxLatencyDurationCount: 8,
-  maxBufferLength: 6,
-  maxMaxBufferLength: 12,
+  // Sentar ~1s atrás da borda (2 segmentos de 0,5s) em vez de 1,5s.
+  liveSyncDurationCount: 2,
+  // Teto de latência baixo: passou disto, o player pula pra frente.
+  liveMaxLatencyDurationCount: 4,
+  // Em vez de deixar a latência acumular até o teto, acelera até 1,5x
+  // para recuperar o atraso suavemente e voltar pra borda ao vivo.
+  maxLiveSyncPlaybackRate: 1.5,
+  // Sem back buffer: não segura mídia já reproduzida.
+  backBufferLength: 0,
+  maxBufferLength: 4,
+  maxMaxBufferLength: 8,
   manifestLoadingMaxRetry: 8,
   levelLoadingMaxRetry: 8,
   fragLoadingMaxRetry: 8,
