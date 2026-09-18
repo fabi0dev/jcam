@@ -6,23 +6,6 @@ export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-zinc-950">
       <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-6 sm:px-8 sm:py-10">
-        <header className="mb-6 flex items-center gap-3 sm:mb-8">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500 text-white">
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 8.5A1.5 1.5 0 0 1 5.5 7H14a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 14 17H5.5A1.5 1.5 0 0 1 4 15.5v-7z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="m15.5 10.5 4-2.5v8l-4-2.5" />
-            </svg>
-          </span>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-white">JCam</h1>
-            </div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
-              Monitoramento ao vivo
-            </p>
-          </div>
-        </header>
-
         <div className="flex flex-1 items-center">
           <CameraViewer
             name={cameraName}

@@ -5,7 +5,7 @@ import { useHlsStream, type StreamStatus } from "@/hooks/useHlsStream";
 import { usePictureInPicture } from "@/hooks/usePictureInPicture";
 import { useCameraAudio } from "@/hooks/useCameraAudio";
 import PTZControls from "@/components/PTZControls";
-import MotionSensorControl from "@/components/MotionSensorControl";
+import SettingsDialog from "@/components/SettingsDialog";
 import { useMotionSensor } from "@/hooks/useMotionSensor";
 
 interface CameraViewerProps {
@@ -20,7 +20,7 @@ const STATUS_META: Record<
 > = {
   online: {
     label: "Ao vivo",
-    dot: "bg-emerald-400 shadow-[0_0_10px_2px_rgba(52,211,153,0.7)]",
+    dot: "bg-emerald-400 shadow-[0_0_10px_2px_rgba(52,211,153,0.7)] animate-pulse",
     text: "text-emerald-300",
   },
   connecting: {
@@ -68,6 +68,7 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
   const frameRef = useRef<HTMLDivElement>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { status, error, connect } = useHlsStream(streamUrl, videoRef);
   const { isSupported: pipSupported, isActive: isPip, toggle: togglePip } =
     usePictureInPicture(videoRef);
@@ -169,21 +170,14 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
           </div>
         )}
 
-        {/* Top bar — status */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 p-3 sm:p-4">
-          <div className="pointer-events-auto flex items-center gap-2.5 rounded-full bg-zinc-900/70 px-3 py-1.5 backdrop-blur-md">
-            <span className={`h-2.5 w-2.5 rounded-full ${statusMeta.dot}`} />
-            <span className="text-sm font-medium text-white">{name}</span>
-            <span className="text-white/20">·</span>
-            <span className={`text-xs font-semibold uppercase tracking-wide ${statusMeta.text}`}>
-              {statusMeta.label}
-            </span>
-          </div>
+        {/* Indicador de "ao vivo" — só o círculo pulsante */}
+        <div className="pointer-events-none absolute left-3 top-3 z-20 sm:left-4 sm:top-4">
+          <span className={`block h-3 w-3 rounded-full ${statusMeta.dot}`} />
         </div>
 
-        {/* Bottom bar — controls + PTZ (aparece ao passar o mouse no vídeo) */}
-        <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-3 p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 sm:p-4">
-          <div className="flex items-center gap-1 rounded-full bg-zinc-900/70 p-1 backdrop-blur-md">
+        {/* Barra de controles unificada (aparece ao passar o mouse no vídeo) */}
+        <div className="absolute inset-x-0 bottom-0 z-20 flex justify-center p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 sm:p-4">
+          <div className="pointer-events-auto flex items-center gap-1 rounded-full bg-zinc-900/70 p-1 shadow-lg shadow-black/30 ring-1 ring-white/10 backdrop-blur-md">
             <ViewerButton
               label={isMuted ? "Ativar som" : "Silenciar"}
               active={!isMuted}
@@ -231,18 +225,37 @@ export default function CameraViewer({ name, streamUrl, ptzApiUrl }: CameraViewe
               )}
             </ViewerButton>
 
+            <span className="mx-1 h-6 w-px bg-white/10" />
+
+            <ViewerButton
+              label="Sensor de movimento"
+              active={motion.enabled}
+              onClick={() => setSettingsOpen(true)}
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 12a3 3 0 1 0 0-.01M4.9 4.9a10 10 0 0 0 0 14.2M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M19.1 4.9a10 10 0 0 1 0 14.2" />
+              </svg>
+            </ViewerButton>
+
             <ViewerButton label="Reconectar" onClick={connect}>
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 4v6h6M20 20v-6h-6M5 15a7 7 0 0 0 12.9 2M19 9A7 7 0 0 0 6.1 7" />
               </svg>
             </ViewerButton>
           </div>
+        </div>
 
+        {/* Controle PTZ — sempre visível, discreto no canto */}
+        <div className="absolute bottom-3 right-3 z-20 sm:bottom-4 sm:right-4">
           <PTZControls apiUrl={ptzApiUrl} />
         </div>
       </div>
 
-      <MotionSensorControl sensor={motion} />
+      <SettingsDialog
+        sensor={motion}
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </section>
   );
 }

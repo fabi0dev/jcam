@@ -29,7 +29,7 @@ function PtzButton({ label, onPointerDown, onPointerUp, onClick, children }: Ptz
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
       onLostPointerCapture={onPointerUp}
-      className="flex h-9 w-9 items-center justify-center rounded-xl text-white transition-colors hover:bg-zinc-700 active:bg-zinc-600"
+      className="flex h-8 w-8 items-center justify-center rounded-xl text-white/90 transition-colors hover:bg-white/15 active:bg-sky-600"
     >
       {children}
     </button>
@@ -95,8 +95,11 @@ export default function PTZControls({ apiUrl }: PTZControlsProps) {
   }, [clearMove, clearStopTimer]);
 
   return (
-    <div className="pointer-events-auto select-none" aria-label="Controle PTZ">
-      <div className="grid grid-cols-3 gap-0.5 rounded-2xl bg-zinc-900/70 p-1 backdrop-blur-md">
+    <div
+      className="pointer-events-auto select-none opacity-40 transition-opacity duration-200 hover:opacity-100 focus-within:opacity-100 [@media(hover:none)]:opacity-70"
+      aria-label="Controle PTZ"
+    >
+      <div className="grid grid-cols-3 gap-0.5 rounded-2xl bg-zinc-950/40 p-1 ring-1 ring-white/10 backdrop-blur-md">
         <span />
         <PtzButton label="Cima" onPointerDown={() => startMove(0, 0.5)} onPointerUp={stop}>
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -111,7 +114,7 @@ export default function PTZControls({ apiUrl }: PTZControlsProps) {
           </svg>
         </PtzButton>
         <PtzButton label="Parar" onClick={stop}>
-          <span className="h-2.5 w-2.5 rounded-full bg-white/80" />
+          <span className="h-2.5 w-2.5 rounded-sm bg-white/80" />
         </PtzButton>
         <PtzButton label="Direita" onPointerDown={() => startMove(0.5, 0)} onPointerUp={stop}>
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
