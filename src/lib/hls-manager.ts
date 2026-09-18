@@ -218,8 +218,12 @@ export function startFFmpeg(): void {
         "hls",
         "-hls_time",
         "0.25",
+        // Janela ao vivo (DVR) de ~10s: 40 segmentos de 0,25s. Não afeta a
+        // latência (o player senta na borda via liveSyncDurationCount), mas dá
+        // margem pro player em segundo plano/PiP se recuperar sem cair fora da
+        // janela e pedir segmentos já apagados (404 -> stream quebra).
         "-hls_list_size",
-        "8",
+        "40",
         "-hls_flags",
         "delete_segments+append_list+omit_endlist+independent_segments",
         "-hls_segment_filename",

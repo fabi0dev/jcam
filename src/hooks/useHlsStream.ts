@@ -14,17 +14,23 @@ interface UseHlsStreamResult {
 const HLS_CONFIG: Partial<Hls["config"]> = {
   enableWorker: true,
   lowLatencyMode: true,
-  // Sentar ~1s atrás da borda (2 segmentos de 0,5s) em vez de 1,5s.
+  // Latência (onde o player senta em relação à borda) é definida SÓ por isto:
+  // ~2 segmentos atrás da borda ao vivo. Buffer e janela DVR abaixo não afetam
+  // a latência, então podem ser generosos sem custo.
   liveSyncDurationCount: 2,
-  // Teto de latência baixo: passou disto, o player pula pra frente.
-  liveMaxLatencyDurationCount: 4,
-  // Em vez de deixar a latência acumular até o teto, acelera até 1,5x
-  // para recuperar o atraso suavemente e voltar pra borda ao vivo.
+  // Repare que NÃO definimos liveMaxLatencyDurationCount (default: sem teto).
+  // Com a aba em segundo plano os timers são estrangulados e o player fica pra
+  // trás; um teto baixo dispararia um pulo brusco pra borda (seek pra mídia
+  // ainda não bufferizada) que trava o vídeo e fecha o Picture-in-Picture. Sem
+  // teto, o catch-up abaixo recupera o atraso suavemente ao voltar pra aba.
+  // Ao voltar pra aba, acelera até 1,5x pra recuperar o atraso sem pulo.
   maxLiveSyncPlaybackRate: 1.5,
-  // Sem back buffer: não segura mídia já reproduzida.
-  backBufferLength: 0,
-  maxBufferLength: 4,
-  maxMaxBufferLength: 8,
+  // Cushion de mídia à frente/atrás pra aguentar o estrangulamento de timers
+  // enquanto a aba está oculta (em PiP). Num stream ao vivo o hls.js nunca
+  // bufferiza além da borda, então valores altos não aumentam a latência.
+  backBufferLength: 8,
+  maxBufferLength: 30,
+  maxMaxBufferLength: 60,
   manifestLoadingMaxRetry: 8,
   levelLoadingMaxRetry: 8,
   fragLoadingMaxRetry: 8,
